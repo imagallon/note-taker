@@ -1,23 +1,27 @@
-const fs = require('fs');
-const util = require('util');
+const { readFile, writeFile } = require('fs').promises;
+
+const path = require('path');
 
 // generate unique ids
 
-const readFileAsync = util.promisify(fs.readFile)
-const writeFileAsync = util.promisify(fs.writeFile)
+// const readFileAsync = util.promisify(fs.readFile)
+// const writeFileAsync = util.promisify(fs.writeFile)
 
 class Store {
+  constructor(fileName) {
+    this.path = path.join(__dirname, `${fileName}.json`)
+  }
   read() {
-    return readFileAsync('db/db.json', 'utf8').then(data => JSON.parse(data))
+    return readFile(this.path, 'utf-8').then((data) => JSON.parse(data))
   } // returns db json
-  write(note){
-    return this.writeFileAsync('db/db.json', JSON.stringify(note))
+  write(data){
+    return writeFile(this.path, JSON.stringify(data))
   } // this will stringify the json data
   getNotes(item){
-    return this.read(). then((note) => this.write([...data, item]));
+    return this.read().then((data) => this.write([...data, item]));
     
   } // read from THIS, and THEN takes notes and concat and parse through our notes
-  addNote(note) {
+  clearNotes(note) {
 
     return this.write([]);
   } // get the title and text from note (Destructure)
@@ -26,6 +30,6 @@ class Store {
     
 }
 
-const note = new Store();
+const note = new Store('db');
 
 module.exports = note;

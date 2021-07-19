@@ -1,12 +1,8 @@
-
-const store = require("../db/store");
+const note = require("../db/store");
 
 module.exports = function (app) {
-  app.get("/notes", (req, res) => {
-    // store
-  
-    // read notes data from file
-    store
+  app.get("/api/notes", (req, res) => {
+    note
       .read()
       .then((data) => {
         // send table data json in response
@@ -18,27 +14,40 @@ module.exports = function (app) {
         return res.status(500).end();
       });
   });
-  
-  app.post("/notes", (req, res) => {
+
+  app.post("/api/notes", (req, res) => {
     // store
-    const notesArray = [];
-    store
-      .getAll()
-      .then(
-        (note) => {
-          // add to tables and return promise
-          return notesArray.push(req.body);
-        }
-        // add to waiting list and return promise
-      )
-      .then(() => {
-        res.json(note);
+    const newNote = req.body;
+    const randomNum = Math.floor(Math.random() * 10000 + 1);
+    newNote.id = `${randomNum}`;
+    note.getNotes(newNote);
+    note
+      .read()
+      .then((data) => {
+        note.write(data);
+        res.json(data);
       })
       .catch((err) => {
         console.log(err);
         return res.status(500).end();
       });
-  });  
-}
+  });
+
+  app.delete("/api/notes/:id", (req, res) => {
+    const chosenNote = req.params.id;
+    note.read().then((data) => {
+      for (let i = 0; i < data.length; i++) {
+        if (chosenNote === data[i].id) {
+          const index = data.indexOf(data[i]);
+          // const afterDelete = data.splice(index, 1);
+          data.splice(index, 1);
+          note.write(data);
+          res.json(data);
+        }
+
+      }
+    });
+  });
+};
 
 //router.delete('notes/:id') UUID
